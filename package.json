@@ -1,0 +1,19 @@
+{
+  "name": "spotify",
+  "version": "1.0.0",
+  "description": "spoMusic web",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jjbc93/spoMusic.git"
+  },
+  "author": "Juan Jose Bernabe Casas",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jjbc93/spoMusic/issues"
+  },
+  "homepage": "https://github.com/jjbc93/spoMusic#readme"
+}
