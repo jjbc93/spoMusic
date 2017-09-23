@@ -9,6 +9,7 @@ var app = require("./app");
 var port = process.env.PORT || 3333;
 
 //Configuración BD
+mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost:27017/spomusic', (err, res) => {
     if(err){
         throw err;
