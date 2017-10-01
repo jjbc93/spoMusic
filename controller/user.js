@@ -5,6 +5,7 @@
 
 var User = require('../models/user');
 var bcrypt = require("bcrypt-nodejs");
+var jwt = require("../service/jwt");
 
 function pruebas(req, res) {
     res.status(200).send({
@@ -58,7 +59,41 @@ function saveUser(req, res){
 
 }
 
+
+function loginUser (req, res) {
+    var params = req.body;
+    var email = params.email;
+    var password = params.password;
+    User.findOne({email: email.toLowerCase()}, (err, user) => {
+        if(err){
+            res.status(500).send({message: "Problema interno del servidor"})
+        }else{
+            if(!user){
+                res.status.send({message: "Usuario no encontrado"})
+            }else{
+                //Comprobar la pass
+                bcrypt.compare(password, user.password, function (err, check) {
+                   if(check){
+                       //Devolver datos del user logueado
+                       if(params.getHash){
+                           //devolver un token de jwt
+                           res.status(200).send({
+                               token: jwt.createToken(user)
+                           })
+                       }else{
+                           res.status(200).send({user});
+                       }
+                   }else{
+                       res.status(404).send({message: "Usuario o contraseña no validos"})
+                   }
+                });
+            }
+        }
+    })
+}
+
 module.exports = {
   pruebas,
-  saveUser
+  saveUser,
+  loginUser
 };
