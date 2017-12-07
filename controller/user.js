@@ -6,6 +6,7 @@
 var User = require('../models/user');
 var bcrypt = require("bcrypt-nodejs");
 var jwt = require("../service/jwt");
+var path = require('path');
 
 function pruebas(req, res) {
     res.status(200).send({
@@ -69,7 +70,7 @@ function loginUser (req, res) {
             res.status(500).send({message: "Problema interno del servidor"})
         }else{
             if(!user){
-                res.status.send({message: "Usuario no encontrado"})
+                res.status(404).send({message: "Usuario no encontrado"})
             }else{
                 //Comprobar la pass
                 bcrypt.compare(password, user.password, function (err, check) {
@@ -90,6 +91,21 @@ function loginUser (req, res) {
             }
         }
     })
+}
+
+function uploadMedia(req, res)
+{
+    console.log("eoeo");
+    var userId = req.params.id;
+    if(req.files){
+        var file_path = req.files.image.path;
+        var file_ext = path.extname(file_path);
+        var file_name = path.basename(file_path, file_ext);
+        console.log("Mi avatars", file_path );
+
+    }else{
+        res.status(500).send({message: 'No se ha podido subir la imagen'});
+    }
 }
 
 function updateUser (req, res)
@@ -114,4 +130,5 @@ module.exports = {
   saveUser,
   loginUser,
   updateUser,
+  uploadMedia,
 };
