@@ -7,6 +7,7 @@ var User = require('../models/user');
 var bcrypt = require("bcrypt-nodejs");
 var jwt = require("../service/jwt");
 var path = require('path');
+var fs = require('fs');
 
 function pruebas(req, res) {
     res.status(200).send({
@@ -95,16 +96,37 @@ function loginUser (req, res) {
 
 function uploadMedia(req, res)
 {
-    console.log("eoeo");
     var userId = req.params.id;
     if(req.files){
         var file_path = req.files.image.path;
         var file_ext = path.extname(file_path);
-        var file_name = path.basename(file_path, file_ext);
-        console.log("Mi avatars", file_path );
+        var file_name = path.basename(file_path, file_ext) + file_ext;
 
+        if(file_ext == ".png" || file_ext == ".jpg" || file_ext == ".gif"){
+            //en el json el parámetro new se indica para que actualize directamente los datos
+            User.findByIdAndUpdate(userId, {image: file_name}, {new:true}, (err, userUpdated) =>{
+                if(!userUpdated){
+                    res.status(500).send({message: "Error al actualizar el usuario"});
+                }else{
+                    res.status(200).send({user: userUpdated});
+                }
+            });
+
+        }else{
+            res.status(400).send({message: "El formato no es valido"});
+        }
     }else{
-        res.status(500).send({message: 'No se ha podido subir la imagen'});
+        res.status(400).send({message: 'No se ha podido subir la imagen'});
+    }
+}
+
+function getImageUser (req, res){
+    var imageFile = req.params.imageFile;
+    var pathFile = "./medias/users/" + imageFile;
+    if(fs.existsSync(pathFile)){
+        res.sendFile(path.resolve(pathFile));
+    }else{
+        res.status(404).send({message: "Recurso no encontrado"});
     }
 }
 
@@ -114,7 +136,7 @@ function updateUser (req, res)
     var update = req.body;
     User.findByIdAndUpdate(userId, update, {new:true}, (err, userUpdated) => {
         if(err){
-            res.status(500).send({message: "Error al actualiar el usuario"});
+            res.status(500).send({message: "Error al actualizar el usuario"});
         }else{
             if(!userUpdated){
                 res.status(404).send({message: "No se ha encontrado el usuario"})
@@ -131,4 +153,5 @@ module.exports = {
   loginUser,
   updateUser,
   uploadMedia,
+  getImageUser,
 };
