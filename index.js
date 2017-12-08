@@ -10,7 +10,7 @@ var port = process.env.PORT || 3333;
 
 //Configuración BD
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost:27017/spomusic', (err, res) => {
+mongoose.connection.openUri('mongodb://localhost:27017/spomusic', (err, res) => {
     if(err){
         throw err;
     }else{
@@ -18,5 +18,5 @@ mongoose.connect('mongodb://localhost:27017/spomusic', (err, res) => {
         app.listen(port, function () {
             console.log("Servidor Api escuchando en http://localhost:", port);
         });
-    }
+}
 });
