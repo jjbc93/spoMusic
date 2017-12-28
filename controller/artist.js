@@ -4,8 +4,8 @@ var fs = require ('fs')
 var moongosePaginate = require('mongoose-pagination');
 
 var Artist = require('../models/artist');
-var album = require('../models/album');
-var song = require('../models/song');
+var Album = require('../models/album');
+var Song = require('../models/song');
 
 function getArtist(req, res)
 {
@@ -27,8 +27,11 @@ function getArtists(req, res)
 {
     var page = req.query.page ? req.query.page : 1;
     var itemsPerpage = req.query.perPage;
-
-    Artist.find().sort('description').paginate(parseInt(page,10), parseInt(itemsPerpage,10), (error, artists, total) =>{
+    var itemsOrderField = req.query.orderSort;
+    var itemsOrderValue = req.query.orderBy
+    var options = {};
+    options[itemsOrderField] = itemsOrderValue;
+    Artist.find().sort(options).paginate(parseInt(page,10), parseInt(itemsPerpage,10), (error, artists, total) =>{
         if(error){
             console.log("error", error)
             res.status(500).send({message: "Error del servidor"});
@@ -83,9 +86,46 @@ function updateArtist(req, res)
     });
 }
 
+function deleteArtist(req, res)
+{
+    var artistId = req.params.id;
+    Artist.findByIdAndRemove(artistId, (error, artistRemoved) => {
+        if(error){
+            res.status(500).send({"message" : "Error al eliminar el recurso"})
+        }else{
+            if(!artistRemoved){
+                res.status(404).send({"message" : "El artista no ha podido ser eliminado"})
+            }else{
+                Album.find({artist : artistRemoved._id}).remove((error, albumRemoved) => {
+                    if(error){
+                        res.status(500).send({"message" : "Error al eliminar recurso"})
+                    }else{
+                        if(!albumRemoved){
+                            res.status(404).send({"message" : "Album no encontrado"});
+                        }else{
+                            Song.find({album: albumRemoved._id}).remove((error, songRemoved) => {
+                                if(error){
+                                    res.status(500).send({"message" : "Error al eliminar recurso"})
+                                }else{
+                                    if(!songRemoved){
+                                        res.status(404).send({"message" : "Canción no encontrada"})
+                                    }else{
+                                        res.status(200).send({"artist" : artistRemoved})
+                                    }
+                                }
+                            })
+                        }
+                    }
+                })
+            }
+        }
+    })
+}
+
 module.exports = {
   getArtist,
   getArtists,
   addArtist,
-  updateArtist
+  updateArtist,
+  deleteArtist
 };
