@@ -95,7 +95,7 @@ function loginUser (req, res) {
 }
 
 function uploadMedia(req, res)
-{
+{   console.log("eoeoe")
     var userId = req.params.id;
     if(req.files){
         var file_path = req.files.image.path;

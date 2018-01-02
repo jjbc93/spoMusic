@@ -122,10 +122,47 @@ function deleteArtist(req, res)
     })
 }
 
+function uploadMedia(req, res)
+{
+    var artistId = req.params.id;
+    if(req.files){
+        var file_path = req.files.image.path;
+        var file_ext = path.extname(file_path);
+        var file_name = path.basename(file_path, file_ext) + file_ext;
+
+        if(file_ext == ".png" || file_ext == ".jpg" || file_ext == ".gif"){
+            //en el json el parámetro new se indica para que actualize directamente los datos
+            Artist.findByIdAndUpdate(artistId, {image: file_name}, {new:true}, (err, artistUpdated) =>{
+                if(!artistUpdated){
+                    res.status(500).send({message: "Error al actualizar el usuario"});
+                }else{
+                    res.status(200).send({artist: artistUpdated});
+                }
+            });
+
+        }else{
+            res.status(400).send({message: "El formato no es valido"});
+        }
+    }else{
+        res.status(400).send({message: 'No se ha podido subir la imagen'});
+    }
+}
+
+function getImageArtist (req, res){
+    var imageFile = req.params.imageFile;
+    var pathFile = "./medias/artists/" + imageFile;
+    if(fs.existsSync(pathFile)){
+        res.sendFile(path.resolve(pathFile));
+    }else{
+        res.status(404).send({message: "Recurso no encontrado"});
+    }
+}
 module.exports = {
   getArtist,
   getArtists,
   addArtist,
   updateArtist,
-  deleteArtist
+  deleteArtist,
+  uploadMedia,
+  getImageArtist
 };
