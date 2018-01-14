@@ -77,8 +77,104 @@ function getAlbum(req, res)
         }
     })
 }
+
+function updateAlbum(req, res)
+{
+    var albumId = req.params.id;
+    var update = req.body;
+    Album.findByIdAndUpdate(albumId, update, {new:true}, (error, albumUpdated) => {
+        if(error){
+            res.status(500).send({"message" : "Error al actualizar"})
+        }else{
+            if(!albumUpdated){
+                res.status(404).send({"message" : "No existe el album"})
+            }else{
+                res.status(200).send({album: albumUpdated});
+            }
+        }
+    });
+    //Otra manera de actualizar los campos
+   /* Album.findOneAndUpdate({'_id' : albumId}, {$set : update}, {new: true}, (error, albumUp) =>{
+        if(error){
+            res.status(500)
+        }else{
+            if(!albumUp){
+                res.status(404)
+            }else{
+                res.status(200).send({"album" : albumUp})
+            }
+        }
+    })*/
+}
+
+function deleteAlbum(req, res)
+{
+    var albumId = req.params.id;
+    Album.findByIdAndRemove(albumId, (error, albumRemoved) => {
+        if(error){
+            res.status(500).send({"message" : "Error al eliminar recurso"})
+        }else{
+            if(!albumRemoved){
+                res.status(404).send({"message" : "Album no encontrado"});
+            }else{
+                Song.find({album: albumRemoved._id}).remove((error, songRemoved) => {
+                    if(error){
+                        res.status(500).send({"message" : "Error al eliminar recurso"})
+                    }else{
+                        if(!songRemoved){
+                            res.status(404).send({"message" : "Canción no encontrada"})
+                        }else{
+                            res.status(200).send({album : albumRemoved})
+                        }
+                    }
+                })
+            }
+        }
+    })
+}
+
+function uploadMedia(req, res)
+{
+    var albumId = req.params.id;
+    if(req.files){
+        var file_path = req.files.image.path;
+        var file_ext = path.extname(file_path);
+        var file_name = path.basename(file_path, file_ext) + file_ext;
+
+        if(file_ext == ".png" || file_ext == ".jpg" || file_ext == ".gif"){
+            //en el json el parámetro new se indica para que actualize directamente los datos
+            Album.findByIdAndUpdate(albumId, {image: file_name}, {new:true}, (err, albumUpdated) =>{
+                if(!albumUpdated){
+                    res.status(500).send({message: "Error al actualizar el usuario"});
+                }else{
+                    res.status(200).send({album: albumUpdated});
+                }
+            });
+
+        }else{
+            res.status(400).send({message: "El formato no es valido"});
+        }
+    }else{
+        res.status(400).send({message: 'No se ha podido subir la imagen'});
+    }
+}
+
+function getImageAlbum (req, res){
+    var imageFile = req.params.imageFile;
+    var pathFile = "./medias/albums/" + imageFile;
+    if(fs.existsSync(pathFile)){
+        res.sendFile(path.resolve(pathFile));
+    }else{
+        res.status(404).send({message: "Recurso no encontrado"});
+    }
+}
+
 module.exports = {
     addAlbum,
     getAlbum,
-    getAlbums
+    getAlbums,
+    updateAlbum,
+    deleteAlbum,
+    uploadMedia,
+    getImageAlbum,
 };
