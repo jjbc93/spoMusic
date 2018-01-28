@@ -30,7 +30,11 @@ function getArtists(req, res)
     var itemsOrderField = req.query.orderSort;
     var itemsOrderValue = req.query.orderBy
     var options = {};
-    options[itemsOrderField] = itemsOrderValue;
+    if(itemsOrderField && itemsOrderValue){
+        options[itemsOrderField] = itemsOrderValue;
+    }else{
+        options = 'name'
+    }
     Artist.find().sort(options).paginate(parseInt(page,10), parseInt(itemsPerpage,10), (error, artists, total) =>{
         if(error){
             console.log("error", error)

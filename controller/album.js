@@ -15,7 +15,11 @@ function getAlbums(req, res)
     var itemsOrderField = req.query.orderSort;
     var itemsOrderValue = req.query.orderBy
     var options = {};
-    options[itemsOrderField] = itemsOrderValue;
+    if(itemsOrderField && itemsOrderValue){
+        options[itemsOrderField] = itemsOrderValue;
+    }else{
+        options = 'title'
+    }
     var find;
     if(!artistId){
         //Devolver todos los albums de la BD
@@ -145,7 +149,7 @@ function uploadMedia(req, res)
             //en el json el parámetro new se indica para que actualize directamente los datos
             Album.findByIdAndUpdate(albumId, {image: file_name}, {new:true}, (err, albumUpdated) =>{
                 if(!albumUpdated){
-                    res.status(500).send({message: "Error al actualizar el usuario"});
+                    res.status(500).send({message: "Error al actualizar el album"});
                 }else{
                     res.status(200).send({album: albumUpdated});
                 }

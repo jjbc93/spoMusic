@@ -95,7 +95,7 @@ function loginUser (req, res) {
 }
 
 function uploadMedia(req, res)
-{   console.log("eoeoe")
+{
     var userId = req.params.id;
     if(req.files){
         var file_path = req.files.image.path;
@@ -108,7 +108,7 @@ function uploadMedia(req, res)
                 if(!userUpdated){
                     res.status(500).send({message: "Error al actualizar el usuario"});
                 }else{
-                    res.status(200).send({user: userUpdated});
+                    res.status(200).send({image: file_name, user: userUpdated});
                 }
             });
 
